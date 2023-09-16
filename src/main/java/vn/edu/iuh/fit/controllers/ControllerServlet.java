@@ -15,6 +15,7 @@ import vn.edu.iuh.fit.repositories.RoleRepository;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 @WebServlet("/control")
@@ -37,14 +38,23 @@ public class ControllerServlet extends HttpServlet {
             String email = req.getParameter("username");
             String pass = req.getParameter("password");
             Account account = accountRepository.checkLogin(email, pass);
+            List<Account> accounts = new ArrayList<>();
+            try {
+                accounts = accountRepository.selectAllAccount();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
 
             if (account != null) {
                 GrantAccess grantAccess = grantAccessRepository.selectGrantAccess(account.getAccountId());
-                req.setAttribute("grantAccess", grantAccess);
-                req.setAttribute("account", account);
+
+
                 if (grantAccess.getRoleId().getRoleId().equalsIgnoreCase("user")) {
+                    req.setAttribute("grantAccess", grantAccess);
+                    req.setAttribute("account", account);
                     req.getRequestDispatcher("info.jsp").forward(req, resp);
                 } else if (grantAccess.getRoleId().getRoleId().equalsIgnoreCase("admin")) {
+                    req.setAttribute("accounts", accounts);
                     req.getRequestDispatcher("dashboard.jsp").forward(req, resp);
                 }
 
