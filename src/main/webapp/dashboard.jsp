@@ -1,4 +1,5 @@
-<%--
+<%@ page import="vn.edu.iuh.fit.models.Account" %>
+<%@ page import="java.util.List" %><%--
   Created by IntelliJ IDEA.
   User: admin
   Date: 09/16/2023
@@ -6,7 +7,6 @@
   To change this template use File | Settings | File Templates.
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%--<%@ taglib prefix="c" uri="http://xmlns.jcp.org/jsp/jstl/core" %>--%>
 
 
 <html>
@@ -89,16 +89,23 @@
     </tr>
     </thead>
     <tbody>
-    <c:forEach var="acc" items="${accounts}">
-        <tr>
-            <td>${acc.accountId}</td>
-            <td>${acc.fullName}</td>
-            <td>${acc.password}</td>
-            <td>${acc.email}</td>
-            <td>${acc.phone}</td>
-            <td>${acc.status}</td>
-        </tr>
-    </c:forEach>
+    <%
+//        Account acc = (Account) request.getAttribute("accountLogin");
+        List<Account> listAccount = (List<Account>) request.getAttribute("accounts");
+    %>
+    <%
+        for(Account acc1 : listAccount){
+    %>
+    <tr>
+        <td><%=acc1.getAccountId()%></td>
+        <td><%=acc1.getFullName()%></td>
+        <td><%=acc1.getPassword()%></td>
+        <td><%=acc1.getEmail()%></td>
+        <td><%=acc1.getPhone()%></td>
+        <td><%=acc1.getStatus()%></td>
+    </tr>
+    <%}%>
+
     </tbody>
 </table>
 

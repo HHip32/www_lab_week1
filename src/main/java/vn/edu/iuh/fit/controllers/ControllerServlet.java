@@ -44,6 +44,7 @@ public class ControllerServlet extends HttpServlet {
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
+            System.out.println(accounts);
 
             if (account != null) {
                 GrantAccess grantAccess = grantAccessRepository.selectGrantAccess(account.getAccountId());
