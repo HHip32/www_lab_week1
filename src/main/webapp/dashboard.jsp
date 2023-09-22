@@ -13,6 +13,23 @@
 <head>
     <title>Quản lý tài khoản</title>
     <style>
+        .navbar {
+            background-color: #007BFF; /* Màu nền của thanh navbar */
+            overflow: hidden;
+        }
+
+        .navbar a {
+            float: left;
+            display: block;
+            color: white; /* Màu chữ của liên kết */
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+        }
+
+        .navbar a:hover {
+            background-color: #0056b3; /* Màu nền khi di chuột qua liên kết */
+        }
         body {
             background-color: #f2f2f2;
         }
@@ -55,7 +72,7 @@
             margin-right: 20px;
         }
 
-        .button-container button {
+        .button-container button, .button-container .logout-button {
             padding: 10px 20px;
             margin-left: 10px;
             border: none;
@@ -63,18 +80,19 @@
             cursor: pointer;
             background-color: #007BFF;
             color: #fff;
+            text-decoration: none; /* Thêm điều này để loại bỏ gạch chân trên liên kết */
+            display: inline-block; /* Thêm điều này để liên kết hiển thị như một nút */
         }
 
-        .button-container button.logout-button .add-button {
-            float: right;
+        .button-container button:hover, .button-container .logout-button:hover {
+            background-color: #0056b3;
         }
-
-        /* .button-container button.add-button {
-            float: right;
-        } */
     </style>
 </head>
-
+<div class="navbar">
+    <a href="dashboard.jsp">Trang Chủ</a>
+    <a href="control?action=listRole">Role</a>
+</div>
 <body>
 <h1>Quản lý người dùng</h1>
 <table>
@@ -91,7 +109,7 @@
     <tbody>
     <%
 //        Account acc = (Account) request.getAttribute("accountLogin");
-        List<Account> listAccount = (List<Account>) request.getAttribute("accounts");
+        List<Account> listAccount = (List<Account>) session.getAttribute("accounts");
     %>
     <%
         for(Account acc1 : listAccount){
@@ -113,7 +131,7 @@
     <button onclick="" class="add-button">Thêm quyền</button>
     <button onclick="">Xóa quyền</button>
     <button onclick="">Chỉnh sửa</button>
-    <button onclick="" class="logout-button">Thoát</button>
+    <a class="logout-button" href="control?action=logout">Thoát</a>
 </div>
 
 </body>

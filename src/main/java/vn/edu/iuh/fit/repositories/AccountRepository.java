@@ -8,7 +8,7 @@ import java.util.List;
 
 public class AccountRepository {
 
-    Connection connection;
+    private Connection connection;
 
     private static final String INSERT_ACCOUNT_SQL = "insert into account"
             + "(account_id, full_name, password, email, phone, status) values"
@@ -90,6 +90,34 @@ public class AccountRepository {
         }
     }
 
+    public Account selectAccountByEmail(String email){
+        Account account = null;
+        String sql = "select * from account"
+                + " where email = ?;";
+
+        try {
+            connection = ConnectDB.getInstance().getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, email);
+            System.out.println(preparedStatement);
+            ResultSet rs = preparedStatement.executeQuery();
+
+            while (rs.next()) {
+                String acc_id = rs.getString("account_id");
+                String fullName = rs.getString("full_name");
+                String password = rs.getString("password");
+                String email1 = rs.getString("email");
+                String phone = rs.getString("phone");
+                int status = rs.getInt("status");
+                account = new Account(acc_id, fullName, password, email1, phone, status);
+            }
+        } catch (SQLException e) {
+            printSQLException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        return account;
+    }
     public Account selectAccount(String account_id) {
         Account account = null;
 

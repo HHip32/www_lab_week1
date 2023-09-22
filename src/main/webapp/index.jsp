@@ -29,8 +29,8 @@
     <div class="col-md-6">
       <div class="login-container">
         <h2 class="mb-4">Đăng Nhập</h2>
-        <form action="control" method="POST">
-          <input type="hidden" name="action" value="login">
+        <form action="control?action=login" method="POST">
+<%--          <input type="hidden" name="action" value="login">--%>
           <div class="mb-3">
             <label for="username" class="form-label">Tài khoản</label>
             <input type="text" class="form-control" id="username" name="username" required>
