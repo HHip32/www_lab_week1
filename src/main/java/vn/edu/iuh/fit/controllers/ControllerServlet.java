@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpSession;
 import org.checkerframework.checker.units.qual.A;
 import vn.edu.iuh.fit.models.Account;
 import vn.edu.iuh.fit.models.GrantAccess;
+import vn.edu.iuh.fit.models.Role;
 import vn.edu.iuh.fit.repositories.AccountRepository;
 import vn.edu.iuh.fit.repositories.GrantAccessRepository;
 import vn.edu.iuh.fit.repositories.LogRepository;
@@ -36,6 +37,10 @@ public class ControllerServlet extends HttpServlet {
         HttpSession session = req.getSession();
         String action = req.getParameter("action");
         List<Account> accounts = new ArrayList<>();
+        Account account = (Account) session.getAttribute("accountLogin");
+        GrantAccess grantAccess = grantAccessRepository.selectGrantAccess(account.getAccountId());
+        Role role = roleRepository.selectRole(grantAccess.getRoleId().getRoleId());
+        session.setAttribute("role", role);
         try {
             accounts = accountRepository.selectAllAccount();
         } catch (SQLException e) {
@@ -44,15 +49,20 @@ public class ControllerServlet extends HttpServlet {
         resp.setContentType("text/html");
         switch (action) {
             case "infomation":
-                session.setAttribute("accounts", accounts);
                 req.getRequestDispatcher("dashboard.jsp").forward(req, resp);
+                break;
+            case "informationOfUser":
+
+                req.getRequestDispatcher("info.jsp").forward(req,resp);
                 break;
             case "listRole":
 
-
-
-                session.setAttribute("accounts", accounts);
                 req.getRequestDispatcher("role.jsp").forward(req, resp);
+                break;
+            case "listRoleOfUser":
+
+
+                req.getRequestDispatcher("roleUser.jsp").forward(req,resp);
                 break;
             case "logout":
                 String email = (String) session.getAttribute("loggedInUserEmail");
@@ -105,7 +115,7 @@ public class ControllerServlet extends HttpServlet {
         if (account != null) {
             GrantAccess grantAccess = grantAccessRepository.selectGrantAccess(account.getAccountId());
             session.setAttribute("grantAccess", grantAccess);
-            session.setAttribute("account", account);
+            session.setAttribute("accountLogin", account);
             session.setAttribute("accounts", accounts);
             session.setAttribute("loggedInUserEmail", email);
             if (grantAccess.getRoleId().getRoleId().equalsIgnoreCase("user")) {
@@ -117,7 +127,15 @@ public class ControllerServlet extends HttpServlet {
             }
 
         } else {
-            resp.sendRedirect("error.jsp");
+            String errorMessage = "Tài khoản không tồn tại.";
+            resp.setContentType("text/html");
+            PrintWriter out = resp.getWriter();
+
+            // Xuất mã JavaScript để hiển thị thông báo lỗi
+            out.println("<script type='text/javascript'>");
+            out.println("alert('" + errorMessage + "');");
+            out.println("window.location.href='" + req.getContextPath() + "/index.jsp';");
+            out.println("</script>");
         }
 
     }

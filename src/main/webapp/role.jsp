@@ -86,11 +86,15 @@
             <tr>
                 <th>Role ID</th>
                 <th>Role Name</th>
+                <th>Description</th>
                 <th>Status</th>
             </tr>
             </thead>
             <tbody>
-            <!-- Thêm dữ liệu cho bảng admin ở đây -->
+            <td>${role.roleId}</td>
+            <td>${role.roleName}</td>
+            <td>${role.description}</td>
+            <td>${role.status}</td>
             </tbody>
         </table>
     </div>

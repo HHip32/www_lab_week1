@@ -105,7 +105,7 @@
 <div class="navbar">
     <a href="info.jsp">Trang Chủ</a>
 <%--    <a href="control?action=listRole">Role</a>--%>
-    <a href="roleUser.jsp">Role</a>
+    <a href="control?action=listRoleOfUser">Role</a>
 </div>
 <body>
 <header>
@@ -127,12 +127,12 @@
     <tbody>
     <!-- Thêm dữ liệu cho bảng ở đây -->
     <tr>
-        <td>${account.accountId}</td>
-        <td>${account.fullName}</td>
-        <td>${account.password}</td>
-        <td>${account.email}</td>
-        <td>${account.phone}</td>
-        <td>${account.status}</td>
+        <td>${accountLogin.accountId}</td>
+        <td>${accountLogin.fullName}</td>
+        <td>${accountLogin.password}</td>
+        <td>${accountLogin.email}</td>
+        <td>${accountLogin.phone}</td>
+        <td>${accountLogin.status}</td>
         <td>${grantAccess.roleId.roleId}</td>
     </tr>
     </tbody>
