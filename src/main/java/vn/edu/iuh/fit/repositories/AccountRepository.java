@@ -15,8 +15,10 @@ public class AccountRepository {
             + " (?, ?, ?, ?, ?, ?);";
     private static final String SELECT_ACCOUNT_BY_ID = "select * from account"
             + " where account_id = ?;";
-    private static final String SELECT_ALL_ACCOUNT = "SELECT * FROM account";
-    private static final String DELETE_ACCOUNT_SQL = "delete from account "
+    private static final String SELECT_ALL_ACCOUNT = "SELECT * FROM account"
+            + " where status != ?;";
+    private static final String DELETE_ACCOUNT_SQL = "update account "
+            + " set status = ?"
             + " where account_id = ?;";
     private static final String UPDATE_ACCOUNT_SQL = "update account"
             + " set full_name = ?, password = ?, email = ?, phone = ?, status = ?"
@@ -71,11 +73,10 @@ public class AccountRepository {
         }
     }
 
-    public void insertAccount(Account account) throws SQLException, ClassNotFoundException {
+    public boolean insertAccount(Account account) throws SQLException, ClassNotFoundException {
         connection = ConnectDB.getInstance().getConnection();
 
         try {
-            System.out.println(INSERT_ACCOUNT_SQL);
             PreparedStatement preparedStatement = connection.prepareStatement(INSERT_ACCOUNT_SQL);
             preparedStatement.setString(1, account.getAccountId());
             preparedStatement.setString(2, account.getFullName());
@@ -83,10 +84,11 @@ public class AccountRepository {
             preparedStatement.setString(4, account.getEmail());
             preparedStatement.setString(5, account.getPhone());
             preparedStatement.setInt(6, account.getStatus());
-            System.out.println(preparedStatement);
             preparedStatement.executeUpdate();
+            return true;
         } catch (SQLException e) {
             printSQLException(e);
+            return false;
         }
     }
 
@@ -149,8 +151,39 @@ public class AccountRepository {
         List<Account> accounts = new ArrayList<>();
 
         try {
+
             connection = ConnectDB.getInstance().getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(SELECT_ALL_ACCOUNT);
+            preparedStatement.setInt(1,-1);
+            System.out.println(preparedStatement);
+            ResultSet rs = preparedStatement.executeQuery();
+
+            while (rs.next()) {
+                String acc_id = rs.getString("account_id");
+                String fullName = rs.getString("full_name");
+                String password = rs.getString("password");
+                String email = rs.getString("email");
+                String phone = rs.getString("phone");
+                int status = rs.getInt("status");
+                accounts.add(new Account(acc_id, fullName, password, email, phone, status));
+            }
+        } catch (SQLException e) {
+            printSQLException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        return accounts;
+    }
+    public List<Account> selectAllAccountNotIncludeAdmin(String account_id) throws SQLException {
+        List<Account> accounts = new ArrayList<>();
+
+        try {
+
+            connection = ConnectDB.getInstance().getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement("select * from account"
+                    + " where account_id != ? and status != ?;");
+            preparedStatement.setString(1, account_id);
+            preparedStatement.setInt(2,-1);
             System.out.println(preparedStatement);
             ResultSet rs = preparedStatement.executeQuery();
 
@@ -193,8 +226,9 @@ public class AccountRepository {
 
         connection = ConnectDB.getInstance().getConnection();
         PreparedStatement preparedStatement = connection.prepareStatement(DELETE_ACCOUNT_SQL);
+        preparedStatement.setInt(1, -1);
+        preparedStatement.setString(2, accountId);
 
-        preparedStatement.setString(1, accountId);
         rowDelete = preparedStatement.executeUpdate() > 0;
 
         return rowDelete;

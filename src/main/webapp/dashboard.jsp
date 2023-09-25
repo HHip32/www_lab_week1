@@ -94,7 +94,8 @@
     <a href="control?action=listRole">Role</a>
 </div>
 <body>
-<h1>Quản lý người dùng</h1>
+<h1>Chào admin ${accountLogin.fullName}</h1>
+<h3>Quản lý người dùng</h3>
 <table>
     <thead>
     <tr>
@@ -104,6 +105,9 @@
         <th>Email</th>
         <th>Phone</th>
         <th>Status</th>
+        <th></th>
+        <th></th>
+        <th></th>
     </tr>
     </thead>
     <tbody>
@@ -121,6 +125,9 @@
         <td><%=acc1.getEmail()%></td>
         <td><%=acc1.getPhone()%></td>
         <td><%=acc1.getStatus()%></td>
+        <td><a href="control?action=delete&id=<%=acc1.getAccountId()%>">delete</a></td>
+        <td><a href="control?action=update&id=<%=acc1.getAccountId()%>">update</a></td>
+        <td><a href="control?action=grant&id=<%=acc1.getAccountId()%>">access</a></td>
     </tr>
     <%}%>
 
@@ -128,10 +135,8 @@
 </table>
 
 <div class="button-container">
-    <button onclick="" class="add-button">Thêm quyền</button>
-    <button onclick="">Xóa quyền</button>
-    <button onclick="">Chỉnh sửa</button>
-    <a class="logout-button" href="control?action=logout">Thoát</a>
+    <a class="logout-button" href="addAccount.jsp">Add Account</a>
+    <a class="logout-button" href="control?action=logout">Logout</a>
 </div>
 
 </body>

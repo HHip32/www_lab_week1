@@ -38,11 +38,18 @@ public class ControllerServlet extends HttpServlet {
         String action = req.getParameter("action");
         List<Account> accounts = new ArrayList<>();
         Account account = (Account) session.getAttribute("accountLogin");
+        try {
+            accounts = accountRepository.selectAllAccountNotIncludeAdmin(account.getAccountId());
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
         GrantAccess grantAccess = grantAccessRepository.selectGrantAccess(account.getAccountId());
         Role role = roleRepository.selectRole(grantAccess.getRoleId().getRoleId());
         session.setAttribute("role", role);
+        session.setAttribute("accounts",accounts);
         try {
-            accounts = accountRepository.selectAllAccount();
+            accounts = accountRepository.selectAllAccountNotIncludeAdmin(account.getAccountId());
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -52,17 +59,13 @@ public class ControllerServlet extends HttpServlet {
                 req.getRequestDispatcher("dashboard.jsp").forward(req, resp);
                 break;
             case "informationOfUser":
-
-                req.getRequestDispatcher("info.jsp").forward(req,resp);
+                req.getRequestDispatcher("info.jsp").forward(req, resp);
                 break;
             case "listRole":
-
                 req.getRequestDispatcher("role.jsp").forward(req, resp);
                 break;
             case "listRoleOfUser":
-
-
-                req.getRequestDispatcher("roleUser.jsp").forward(req,resp);
+                req.getRequestDispatcher("roleUser.jsp").forward(req, resp);
                 break;
             case "logout":
                 String email = (String) session.getAttribute("loggedInUserEmail");
@@ -75,17 +78,46 @@ public class ControllerServlet extends HttpServlet {
                 } catch (ClassNotFoundException e) {
                     throw new RuntimeException(e);
                 }
-
                 resp.sendRedirect("index.jsp");
+                break;
+            case "update":
+               Account accUpdate = accountRepository.selectAccount(req.getParameter("id"));
+               session.setAttribute("accUpdate", accUpdate);
+               resp.sendRedirect("updateAccount.jsp");
+                break;
+            case "delete":
+                try {
+                    if (accountRepository.deleteAccount(req.getParameter("id"))) {
+
+                        session.setAttribute("accounts", accounts);
+
+                        String alertScript = "<script>alert('Xóa thành công!');</script>";
+                        resp.setContentType("text/html");
+                        resp.getWriter().write(alertScript);
+                        req.getRequestDispatcher("/dashboard.jsp").forward(req,resp);
+
+                    }
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                } catch (ClassNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
                 break;
         }
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-
+        HttpSession session = req.getSession();
         String action = req.getParameter("action");
         resp.setContentType("text/html");
+//        Account account = (Account) session.getAttribute("accountLogin");
+//        List<Account> accounts = new ArrayList<>();
+//        try {
+//            accounts = accountRepository.selectAllAccountNotIncludeAdmin(account.getAccountId());
+//        } catch (SQLException e) {
+//            throw new RuntimeException(e);
+//        }
         switch (action) {
             case "login":
                 try {
@@ -95,6 +127,16 @@ public class ControllerServlet extends HttpServlet {
                 } catch (ClassNotFoundException e) {
                     throw new RuntimeException(e);
                 }
+                break;
+            case "addAccount":
+//                List<Account> accounts = new ArrayList<>();
+//                accounts = (List<Account>) session.getAttribute("accounts");
+                addAccount(req, resp);
+                break;
+            case "updateAccount":
+//                List<Account> accounts = new ArrayList<>();
+//                accounts = (List<Account>) session.getAttribute("accounts");
+                updateAccount(req,resp);
                 break;
         }
 
@@ -108,7 +150,7 @@ public class ControllerServlet extends HttpServlet {
         Account account = accountRepository.checkLogin(email, pass);
         List<Account> accounts = new ArrayList<>();
         try {
-            accounts = accountRepository.selectAllAccount();
+            accounts = accountRepository.selectAllAccountNotIncludeAdmin(account.getAccountId());
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -138,5 +180,86 @@ public class ControllerServlet extends HttpServlet {
             out.println("</script>");
         }
 
+    }
+
+    public void addAccount(HttpServletRequest req, HttpServletResponse resp) {
+        HttpSession session = req.getSession();
+        List<Account> accounts = (List<Account>) session.getAttribute("accounts");
+        String accID = req.getParameter("AccountID");
+        String fullname = req.getParameter("Fullname");
+        String pass = req.getParameter("Password");
+        String email = req.getParameter("Email");
+        String phone = req.getParameter("Phone");
+        Account account = new Account(accID, fullname, pass, email, phone, 1);
+        try {
+            if (accountRepository.insertAccount(account)) {
+                String errorMessage = "Thêm tài khoản thành công!";
+                resp.setContentType("text/html");
+                PrintWriter out = resp.getWriter();
+
+                // Xuất mã JavaScript để hiển thị thông báo lỗi
+                out.println("<script type='text/javascript'>");
+                out.println("alert('" + errorMessage + "');");
+                out.println("window.location.href='" + req.getContextPath() + "/addAccount.jsp';");
+                out.println("</script>");
+                accounts.add(account);
+                session.setAttribute("accounts", accounts);
+                resp.sendRedirect("dashboard.jsp");
+            } else {
+                String errorMessage = "Thêm tài khoản thất bại!";
+                resp.setContentType("text/html");
+                PrintWriter out = resp.getWriter();
+
+                // Xuất mã JavaScript để hiển thị thông báo lỗi
+                out.println("<script type='text/javascript'>");
+                out.println("alert('" + errorMessage + "');");
+                out.println("window.location.href='" + req.getContextPath() + "/addAccount.jsp';");
+                out.println("</script>");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException | IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public void updateAccount(HttpServletRequest req, HttpServletResponse resp) {
+        HttpSession session = req.getSession();
+        List<Account> accounts = (List<Account>) session.getAttribute("accounts");
+        String accID = req.getParameter("AccountID");
+        String fullname = req.getParameter("Fullname");
+        String pass = req.getParameter("Password");
+        String email = req.getParameter("Email");
+        String phone = req.getParameter("Phone");
+        Account account = new Account(accID, fullname, pass, email, phone, 1);
+        try {
+            if (accountRepository.updateAccount(account)) {
+                String errorMessage = "Cập nhật tài khoản thành công!";
+                resp.setContentType("text/html");
+                PrintWriter out = resp.getWriter();
+
+                // Xuất mã JavaScript để hiển thị thông báo lỗi
+                out.println("<script type='text/javascript'>");
+                out.println("alert('" + errorMessage + "');");
+                out.println("window.location.href='" + req.getContextPath() + "/updateAccount.jsp';");
+                out.println("</script>");
+                accounts.add(account);
+                session.setAttribute("accounts", accounts);
+                resp.sendRedirect("dashboard.jsp");
+            } else {
+                String errorMessage = "Cập nật tài khoản thất bại!";
+                resp.setContentType("text/html");
+                PrintWriter out = resp.getWriter();
+
+                // Xuất mã JavaScript để hiển thị thông báo lỗi
+                out.println("<script type='text/javascript'>");
+                out.println("alert('" + errorMessage + "');");
+                out.println("window.location.href='" + req.getContextPath() + "/updateAccount.jsp';");
+                out.println("</script>");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException | IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
