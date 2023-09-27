@@ -48,9 +48,7 @@ public class AccountRepository {
                 int status = rs.getInt("status");
                 account = new Account(acc_id,fullName,pass,em,phone,status);
             }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } catch (ClassNotFoundException e) {
+        } catch (SQLException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
 

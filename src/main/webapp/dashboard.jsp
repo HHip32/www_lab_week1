@@ -6,7 +6,7 @@
   Time: 09:37 PM
   To change this template use File | Settings | File Templates.
 --%>
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8"  %>
 
 
 <html>
@@ -60,11 +60,6 @@
 
         tr:nth-child(even) {
             background-color: #f2f2f2;
-        }
-
-        .edit-input {
-            width: 100%;
-            border: none;
         }
 
         .button-container {

@@ -6,7 +6,7 @@ import java.sql.SQLException;
 
 public class ConnectDB {
   private static ConnectDB instance;
-  private Connection connection;
+  private final Connection connection;
 
     public ConnectDB() throws SQLException, ClassNotFoundException {
         Class.forName("org.mariadb.jdbc.Driver");

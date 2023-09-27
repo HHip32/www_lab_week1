@@ -6,7 +6,7 @@ public enum isGrant {
     ZERO(0);
     private final int value;
 
-    private isGrant(int value) {
+    isGrant(int value) {
         this.value = value;
     }
     public int getValue() {

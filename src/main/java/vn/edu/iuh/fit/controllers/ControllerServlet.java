@@ -1,13 +1,11 @@
 package vn.edu.iuh.fit.controllers;
 
-import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import org.checkerframework.checker.units.qual.A;
 import vn.edu.iuh.fit.models.Account;
 import vn.edu.iuh.fit.models.GrantAccess;
 import vn.edu.iuh.fit.models.Role;
@@ -20,23 +18,22 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @WebServlet("/control")
 public class ControllerServlet extends HttpServlet {
 
-    private AccountRepository accountRepository = new AccountRepository();
-    private GrantAccessRepository grantAccessRepository = new GrantAccessRepository();
-    private RoleRepository roleRepository = new RoleRepository();
-    private LogRepository logRepository = new LogRepository();
+    private final AccountRepository accountRepository = new AccountRepository();
+    private final GrantAccessRepository grantAccessRepository = new GrantAccessRepository();
+    private final RoleRepository roleRepository = new RoleRepository();
+    private final LogRepository logRepository = new LogRepository();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
         HttpSession session = req.getSession();
         String action = req.getParameter("action");
-        List<Account> accounts = new ArrayList<>();
+        List<Account> accounts;
         Account account = (Account) session.getAttribute("accountLogin");
         try {
             accounts = accountRepository.selectAllAccountNotIncludeAdmin(account.getAccountId());
@@ -47,12 +44,7 @@ public class ControllerServlet extends HttpServlet {
         GrantAccess grantAccess = grantAccessRepository.selectGrantAccess(account.getAccountId());
         Role role = roleRepository.selectRole(grantAccess.getRoleId().getRoleId());
         session.setAttribute("role", role);
-        session.setAttribute("accounts",accounts);
-        try {
-            accounts = accountRepository.selectAllAccountNotIncludeAdmin(account.getAccountId());
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        session.setAttribute("accounts", accounts);
         resp.setContentType("text/html");
         switch (action) {
             case "infomation":
@@ -73,28 +65,24 @@ public class ControllerServlet extends HttpServlet {
 
                 try {
                     logRepository.updateLogs(acc.getAccountId(), LocalDateTime.now());
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                } catch (ClassNotFoundException e) {
+                } catch (SQLException | ClassNotFoundException e) {
                     throw new RuntimeException(e);
                 }
                 resp.sendRedirect("index.jsp");
                 break;
             case "update":
-               Account accUpdate = accountRepository.selectAccount(req.getParameter("id"));
-               session.setAttribute("accUpdate", accUpdate);
-               resp.sendRedirect("updateAccount.jsp");
+                Account accUpdate = accountRepository.selectAccount(req.getParameter("id"));
+                session.setAttribute("accUpdate", accUpdate);
+                resp.sendRedirect("updateAccount.jsp");
                 break;
             case "delete":
                 try {
                     if (accountRepository.deleteAccount(req.getParameter("id"))) {
 //                        req.getRequestDispatcher("dashboard.jsp").forward(req,resp);
-                        req.getRequestDispatcher("control?action=infomation").forward(req,resp);
-//                        resp.sendRedirect("control?action=infomation");
+//                        req.getRequestDispatcher("control?action=infomation").forward(req, resp);
+                        resp.sendRedirect("control?action=infomation");
                     }
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                } catch (ClassNotFoundException e) {
+                } catch (SQLException | ClassNotFoundException e) {
                     throw new RuntimeException(e);
                 }
                 break;
@@ -102,17 +90,15 @@ public class ControllerServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        HttpSession session = req.getSession(true);
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+//        HttpSession session = req.getSession(true);
         String action = req.getParameter("action");
         resp.setContentType("text/html");
         switch (action) {
             case "login":
                 try {
                     login(req, resp);
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                } catch (ClassNotFoundException e) {
+                } catch (SQLException | ClassNotFoundException e) {
                     throw new RuntimeException(e);
                 }
                 break;
@@ -122,13 +108,13 @@ public class ControllerServlet extends HttpServlet {
                 break;
             case "updateAccount":
 
-                updateAccount(req,resp);
+                updateAccount(req, resp);
                 break;
         }
 
     }
 
-    protected void login(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException, SQLException, ClassNotFoundException {
+    protected void login(HttpServletRequest req, HttpServletResponse resp) throws IOException, SQLException, ClassNotFoundException {
         HttpSession session = req.getSession();
         String email = req.getParameter("username");
         String pass = req.getParameter("password");
@@ -136,7 +122,7 @@ public class ControllerServlet extends HttpServlet {
         Account account = accountRepository.checkLogin(email, pass);
 
         if (account != null) {
-            List<Account> accounts = new ArrayList<>();
+            List<Account> accounts;
             try {
                 accounts = accountRepository.selectAllAccountNotIncludeAdmin(account.getAccountId());
             } catch (SQLException e) {
@@ -188,6 +174,7 @@ public class ControllerServlet extends HttpServlet {
                 out.println("window.location.href='" + req.getContextPath() + "/addAccount.jsp';");
                 out.println("</script>");
 
+//                resp.sendRedirect("dashboard.jsp");
                 resp.sendRedirect("control?action=infomation");
             } else {
                 String errorMessage = "Thêm tài khoản thất bại!";
@@ -200,12 +187,11 @@ public class ControllerServlet extends HttpServlet {
                 out.println("window.location.href='" + req.getContextPath() + "/addAccount.jsp';");
                 out.println("</script>");
             }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } catch (ClassNotFoundException | IOException e) {
+        } catch (SQLException | ClassNotFoundException | IOException e) {
             throw new RuntimeException(e);
         }
     }
+
     public void updateAccount(HttpServletRequest req, HttpServletResponse resp) {
         String accID = req.getParameter("AccountID");
         String fullname = req.getParameter("Fullname");
@@ -215,12 +201,12 @@ public class ControllerServlet extends HttpServlet {
         Account account = new Account(accID, fullname, pass, email, phone, 1);
         try {
             if (accountRepository.updateAccount(account)) {
-                String errorMessage = "Cập nhật tài khoản thành công!";
+
+
                 resp.sendRedirect("control?action=infomation");
+
             }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } catch (ClassNotFoundException | IOException e) {
+        } catch (SQLException | ClassNotFoundException | IOException e) {
             throw new RuntimeException(e);
         }
     }
