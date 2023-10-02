@@ -14,16 +14,22 @@ public class GrantAccess {
         this.accountId = accountId;
     }
 
-    public GrantAccess(vn.edu.iuh.fit.models.isGrant isGrant, String note) {
+    public GrantAccess(isGrant isGrant, String note) {
         this.isGrant = isGrant;
         this.note = note;
     }
 
-    public GrantAccess(Role roleId, Account accountId, vn.edu.iuh.fit.models.isGrant isGrant, String note) {
+    public GrantAccess(Role roleId, Account accountId, isGrant isGrant, String note) {
         this.roleId = roleId;
         this.accountId = accountId;
         this.isGrant = isGrant;
         this.note = note;
+    }
+
+    public GrantAccess(Role roleId, Account accountId, isGrant isGrant) {
+        this.roleId = roleId;
+        this.accountId = accountId;
+        this.isGrant = isGrant;
     }
 
     public Role getRoleId() {

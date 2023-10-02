@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpSession;
 import vn.edu.iuh.fit.models.Account;
 import vn.edu.iuh.fit.models.GrantAccess;
 import vn.edu.iuh.fit.models.Role;
+import vn.edu.iuh.fit.models.isGrant;
 import vn.edu.iuh.fit.repositories.AccountRepository;
 import vn.edu.iuh.fit.repositories.GrantAccessRepository;
 import vn.edu.iuh.fit.repositories.LogRepository;
@@ -86,12 +87,16 @@ public class ControllerServlet extends HttpServlet {
                     throw new RuntimeException(e);
                 }
                 break;
+            case "grant":
+                session.setAttribute("accountIDForGrantAccess", req.getParameter("id"));
+                resp.sendRedirect("grantAccess.jsp");
+                break;
         }
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-//        HttpSession session = req.getSession(true);
+        HttpSession session = req.getSession(true);
         String action = req.getParameter("action");
         resp.setContentType("text/html");
         switch (action) {
@@ -109,6 +114,16 @@ public class ControllerServlet extends HttpServlet {
             case "updateAccount":
 
                 updateAccount(req, resp);
+                break;
+            case "grantAccess":
+                String accID = req.getParameter("accountID");
+                String roleID = req.getParameter("role");
+                GrantAccess grantAccess = new GrantAccess(new Role(roleID),new Account(accID), isGrant.ONE);
+                if(grantAccessRepository.insertGrantAccess(grantAccess)){
+                    resp.sendRedirect("dashboard.jsp");
+                }else {
+                    System.out.println("GrantAccess Failed!");
+                }
                 break;
         }
 
